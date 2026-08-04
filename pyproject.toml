@@ -1,0 +1,67 @@
+# SPDX-FileCopyrightText: 2026 Stefano Maurogiovanni <s.maurogiovanni@gmx.de>
+#
+# SPDX-License-Identifier: MIT
+
+[project]
+name = "multimodal-lucas"
+version = "0.1.0a0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Stefano Maurogiovanni", email = "s.maurogiovanni@fz-juelich.de" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "datasets[vision]>=5.0.1",
+    "dotenv>=0.9.9",
+    "huggingface-hub>=1.26.0",
+    "loguru>=0.7.3",
+    "tqdm>=4.70.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.11.8,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "commitizen>=4.17.0",
+    "mdformat>=1.0.0",
+    "pre-commit>=4.6.1",
+    "reuse>=6.2.0",
+    "ruff>=0.16.1",
+    "yamlfix>=1.19.1",
+]
+
+[tool.ruff]
+line-length = 88              
+target-version = "py312"       
+src = ["src"]                 
+extend-include = ["scripts/*.py", "pyproject.toml", "*.toml"]                
+exclude = [                   
+    ".git",
+    "__pycache__",
+    ".venv",
+    "build",
+    "dist",
+    "src/lfg.egg-info",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4"]  
+ignore = ["E501"]             
+fixable = ["ALL"]             
+unfixable = []   
+per-file-ignores = {"pyproject.toml" = ["INP001"]}
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "$version"
+version_scheme = "pep440"
+version_provider = "uv"
+update_changelog_on_bump = true
+major_version_zero = true
+version_files = [
+    "pyproject.toml:version",
+    "src/multimodal-lucas/__init__.py:__version__",
+]

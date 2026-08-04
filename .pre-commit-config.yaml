@@ -1,0 +1,61 @@
+---
+# SPDX-FileCopyrightText: 2026 Stefano Maurogiovanni <s.maurogiovanni@gmx.de>
+#
+# SPDX-License-Identifier: MIT
+repos:
+  - hooks:
+      - args: [--fix]
+        id: ruff
+      - id: ruff-format
+    repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.1
+  - hooks:
+      - description: CommonMark compliant Markdown formatter
+        entry: mdformat
+        id: mdformat
+        language: python
+        minimum_pre_commit_version: 1.0.0
+        name: mdformat
+        types: [markdown]
+    repo: https://github.com/hukkin/mdformat
+    rev: 1.0.0
+  - hooks:
+      - additional_dependencies: []
+        args: []
+        description: Run 'mbake format' for Makefile formatting
+        entry: mbake format
+        id: mbake-format
+        language: python
+        name: mbake format
+        require_serial: true
+        types: [makefile]
+    repo: https://github.com/EbodShojaei/bake
+    rev: v1.4.6
+  - hooks:
+      - additional_dependencies: ['.[charset-normalizer,chardet]']
+        args: [lint]
+        description: Lint the project directory for compliance with the REUSE Specification.
+        entry: reuse
+        id: reuse
+        language: python
+        name: reuse lint
+        pass_filenames: false
+      - additional_dependencies: ['.[charset-normalizer,chardet]']
+        args: [lint-file]
+        description: Lint the changed files for compliance with the REUSE Specification.
+        entry: reuse
+        id: reuse-lint-file
+        language: python
+        name: reuse lint-file
+    repo: https://codeberg.org/fsfe/reuse-tool
+    rev: v6.2.0
+  - hooks:
+      - id: yamlfix
+    repo: https://github.com/lyz-code/yamlfix/
+    rev: 1.19.1
+  - hooks:
+      - id: commitizen
+      - id: commitizen-branch
+        stages: [pre-push]
+    repo: https://github.com/commitizen-tools/commitizen
+    rev: v4.17.0
