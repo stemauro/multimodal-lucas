@@ -5,6 +5,7 @@
 """Load, filter, augment and clean LUCAS metadata into an Hugging Face dataset."""
 
 import asyncio
+from argparse import ArgumentParser
 from asyncio import Queue
 from collections.abc import MutableSequence, Sequence
 from itertools import batched, zip_longest
@@ -18,12 +19,11 @@ from polars import selectors as cs
 from tqdm.asyncio import tqdm
 
 from multimodal_lucas import project_root
-from multimodal_lucas.config import LucasDirection, get_url_pattern
+from multimodal_lucas.config import LUCAS_YEARS, LucasDirection, get_url_pattern
 from multimodal_lucas.data import load_dataframe, save_dataframe
 
 
 class ScriptArgs(Protocol):
-    direction: str
     year: str
     num_tasks: int
 
@@ -110,33 +110,30 @@ async def main(args: ScriptArgs) -> None:
 
     # 1. Load dataset and compile file URLs ###
 
-    year = args["year"]
-
     is_valid_crop = pl.col("SURVEY_LC1").str.starts_with("B") & ~pl.col(
         "SURVEY_LC1"
     ).str.contains("x")
 
     df_raw = load_dataframe(
         "csv",
-        path=project_root / "data" / "raw" / f"EU_LUCAS_{year}.csv",
+        path=project_root / "data" / "raw" / f"EU_LUCAS_{args.year}.csv",
         infer_schema=False,
     )
 
-    url_exprs = [compile_url_expr(year, direction) for direction in LucasDirection]
+    url_exprs = [compile_url_expr(args.year, direction) for direction in LucasDirection]
     df_augmented = (
         df_raw.select("POINT_ID", "POINT_NUTS0", "SURVEY_LC1")
         .filter(is_valid_crop)
         .with_columns(url_exprs)
-    )[:100]
+    )[:5]
 
     # 2. Validate URLs by storing their response code upon fetch
 
     queue = Queue()
-    num_tasks = args["num_tasks"]
     results = []
 
     data = df_augmented.select("POINT_ID", cs.starts_with("PHOTO")).rows(named=True)
-    data_chunks = chunk_according_to_tasks(data, num_tasks=num_tasks)
+    data_chunks = chunk_according_to_tasks(data, num_tasks=args.num_tasks)
 
     fetch_progress = tqdm(total=len(data), desc="Fetching headers", unit="url")
     flush_progress = tqdm(total=len(data), desc="Flushing status codes", unit="item")
@@ -166,7 +163,7 @@ async def main(args: ScriptArgs) -> None:
         pl.any_horizontal(cs.ends_with("HTTP_STATUS").eq(200))
     )
 
-    output_dir = project_root / "data" / "processed" / args["year"]
+    output_dir = project_root / "data" / "processed" / args.year
     output_dir.mkdir(exist_ok=True, parents=True)
     save_dataframe(df_clean, fmt="jsonl", path=output_dir / "manifest.jsonl")
 
@@ -198,7 +195,27 @@ async def main(args: ScriptArgs) -> None:
     dataset_clean.save_to_disk(str(output_dir))
 
 
+""
+
 if __name__ == "__main__":
-    args = {"direction": "point", "year": "2022", "num_tasks": 4}
+    parser = ArgumentParser(
+        description="Data preparation script.", prog="uv run scripts/preprocess.py"
+    )
+
+    parser.add_argument(
+        "--year",
+        type=str,
+        choices=LUCAS_YEARS,
+        default="2022",
+        help="The LUCAS reference year (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--num_tasks",
+        type=int,
+        default=4,
+        help="The number of asynchronous tasks performing URLs validation (default: %(default)s)",
+    )
+
+    args = parser.parse_args()
 
     asyncio.run(main(args))
