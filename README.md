@@ -18,7 +18,7 @@ Requires Python3.12+.
 
 ```shell
 git clone git@github.com:stemauro/multimodal-lucas.git && cd multimodal-lucas
-uv sync --all-groups
+uv sync --all-groups --extra dev
 ```
 
 ## Repository structure

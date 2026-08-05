@@ -20,13 +20,13 @@ class LucasDirection(StrEnum):
     POINT = "point"
     CLOSEUP = "crop"
 
-    def _fmt_suffix_legacy(self):
+    def _fmt_suffix_legacy(self) -> str:
         return self.value[0].upper()
 
-    def _fmt_suffix_latest(self):
+    def _fmt_suffix_latest(self) -> str:
         return self.value.capitalize()
 
-    def to_suffix(self, year: str):
+    def to_suffix(self, year: str) -> str:
         if int(year) < 2022:
             return self._fmt_suffix_legacy()
         return self._fmt_suffix_latest()

@@ -4,9 +4,11 @@
 
 """Dataset and dataframes management utilities."""
 
+from collections.abc import MutableMapping
 from enum import StrEnum, auto
 from functools import partial
 from pathlib import Path
+from typing import Any
 
 import polars as pl
 
@@ -37,8 +39,10 @@ POLARS_WRITERS = {
 
 
 def load_dataframe(
-    fmt: str | DataframeFormat, path: str | Path, **loader_specific_kwargs
-):
+    fmt: str | DataframeFormat,
+    path: str | Path,
+    **loader_specific_kwargs: MutableMapping[str, Any],
+) -> pl.DataFrame:
     """A convenient wrapper around a polars loader function, i.e., polars.load_csv(),
     agnostic with respect to the data format and with controlled unstrict loading option
     """
@@ -53,8 +57,8 @@ def save_dataframe(
     frame: pl.DataFrame,
     fmt: str | DataframeFormat,
     path: str | Path,
-    **polars_writing_kwargs,
-):
+    **polars_writing_kwargs: MutableMapping[str, Any],
+) -> None:
     """A convenient wrapper around a polars loader function, i.e., polars.load_csv(),
     agnostic with respect to the data format and with controlled unstrict loading option
     """
@@ -62,4 +66,4 @@ def save_dataframe(
     fmt = DataframeFormat(fmt)
     path = Path(path)
 
-    return POLARS_WRITERS[fmt](frame, path, **polars_writing_kwargs)
+    POLARS_WRITERS[fmt](frame, path, **polars_writing_kwargs)

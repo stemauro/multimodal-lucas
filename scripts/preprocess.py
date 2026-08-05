@@ -6,9 +6,9 @@
 
 import asyncio
 from asyncio import Queue
-from collections.abc import Sequence
+from collections.abc import MutableSequence, Sequence
 from itertools import batched, zip_longest
-from typing import Any
+from typing import Any, Protocol
 
 import polars as pl
 import requests
@@ -22,11 +22,17 @@ from multimodal_lucas.config import LucasDirection, get_url_pattern
 from multimodal_lucas.data import load_dataframe, save_dataframe
 
 
+class ScriptArgs(Protocol):
+    direction: str
+    year: str
+    num_tasks: int
+
+
 def is_resource_found(url: str) -> bool:
     return requests.get(url).ok
 
 
-def chunk_according_to_tasks(data: Sequence[Any], num_tasks: int) -> list[list[Any]]:
+def chunk_according_to_tasks(data: Sequence[Any], num_tasks: int) -> list[tuple[Any]]:
     num_samples = len(data)
     chunk_size = num_samples // num_tasks
 
@@ -39,39 +45,11 @@ def chunk_according_to_tasks(data: Sequence[Any], num_tasks: int) -> list[list[A
     fitting_chunked = batched(fitting, n=chunk_size)
 
     balanced_chunks = [
-        f if o is None else [*f, o]
+        f if o is None else (*f, o)
         for f, o in zip_longest(fitting_chunked, overflowing)
     ]
 
     return balanced_chunks
-
-
-async def fetch_status_codes(
-    resources: Sequence[dict[str, str]],
-    session: ClientSession,
-    queue: Queue,
-    progress_bar,
-) -> None:
-    for resource in resources:
-        result = {"POINT_ID": resource.pop("POINT_ID")}
-        for name, url in resource.items():
-            async with session.head(url) as headers:
-                key = name.replace("URL", "HTTP_STATUS")
-                result[key] = headers.status
-        await queue.put(result)
-        progress_bar.update(1)
-
-
-async def flush_to_list(queue: Queue, results: list[tuple[str, str]], progress_bar):
-    while True:
-        item = await queue.get()
-        if item is None:
-            queue.task_done()
-            break
-        results.append(item)
-        queue.task_done()
-        progress_bar.update(1)
-    return results
 
 
 def compile_url_expr(year: str, direction: LucasDirection) -> pl.Expr:
@@ -96,9 +74,41 @@ def lowercase_column_names(dataset: Dataset) -> Dataset:
     return dataset.rename_columns(name_mapping)
 
 
-async def main(args) -> None:
+async def fetch_status_codes(
+    resources: Sequence[dict[str, str]],
+    session: ClientSession,
+    queue: Queue[dict[str, int | str]],
+    progress_bar: tqdm,
+) -> None:
+    for resource in resources:
+        result = {"POINT_ID": resource.pop("POINT_ID")}
+        for name, url in resource.items():
+            async with session.head(url) as headers:
+                key = name.replace("URL", "HTTP_STATUS")
+                result[key] = headers.status
+        await queue.put(result)
+        progress_bar.update(1)
 
-    ## 1. Load dataset and compile file URLs ###
+
+async def flush_to_list(
+    queue: Queue[dict[str, int | str]],
+    results: MutableSequence[dict[str, int | str]],
+    progress_bar: tqdm,
+) -> MutableSequence[dict[str, int | str]]:
+    while True:
+        item = await queue.get()
+        if item is None:
+            queue.task_done()
+            break
+        results.append(item)
+        queue.task_done()
+        progress_bar.update(1)
+    return results
+
+
+async def main(args: ScriptArgs) -> None:
+
+    # 1. Load dataset and compile file URLs ###
 
     year = args["year"]
 
@@ -119,7 +129,7 @@ async def main(args) -> None:
         .with_columns(url_exprs)
     )[:100]
 
-    ## 2. Validate URLs by storing their response code upon fetch
+    # 2. Validate URLs by storing their response code upon fetch
 
     queue = Queue()
     num_tasks = args["num_tasks"]
@@ -150,7 +160,7 @@ async def main(args) -> None:
 
     df_valiadated = df_augmented.join(pl.DataFrame(results), on="POINT_ID")
 
-    ## 3. Remove entries bereft of available photos
+    # 3. Remove entries bereft of available photos
 
     df_clean = df_valiadated.filter(
         pl.any_horizontal(cs.ends_with("HTTP_STATUS").eq(200))
@@ -160,7 +170,7 @@ async def main(args) -> None:
     output_dir.mkdir(exist_ok=True, parents=True)
     save_dataframe(df_clean, fmt="jsonl", path=output_dir / "manifest.jsonl")
 
-    ## 4. Convert dataframe to a HuggingFace dataset save it locally
+    # 4. Convert dataframe to a HuggingFace dataset save it locally
 
     features = Features(
         {
