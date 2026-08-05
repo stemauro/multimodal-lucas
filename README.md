@@ -18,7 +18,7 @@ Requires Python3.12+.
 
 ```shell
 git clone git@github.com:stemauro/multimodal-lucas.git && cd multimodal-lucas
-uv sync --extra dev
+uv sync --all-groups
 ```
 
 ## Repository structure
@@ -28,9 +28,20 @@ multimodal-lucas/
 ├── LICENSES
 │   └── MIT.txt
 ├── README.md
+├── assets
+├── data
+│   ├── processed
+│   │   └── 2022
+│   │       ├── data-00000-of-00001.arrow
+│   │       ├── dataset_info.json
+│   │       ├── manifest.jsonl
+│   │       └── state.json
+│   └── raw
+│       └── EU_LUCAS_2022.csv
 ├── pyproject.toml
+├── scripts
+│   └── preprocess.py
 ├── src
 │   └── multimodal_lucas
-│       
 └── uv.lock
 ```
