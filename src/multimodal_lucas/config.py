@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: MIT
 
+"""Configuration utilities based on domain-specific logic and library design choices."""
+
 from enum import StrEnum
 from functools import partial
 
@@ -52,4 +54,4 @@ FILENAME_PATTERNS = {
 
 
 def get_url_pattern(year: str, direction: LucasDirection, fmt: str = "jpg") -> str:
-    return f"{GISCO_PHOTOS_BASE_URL}/{{}}/{{}}/{{}}/{FILENAME_PATTERNS[year](direction=direction)}.{fmt}"
+    return f"{GISCO_PHOTOS_BASE_URL}/{year}/{{}}/{{}}/{{}}/{FILENAME_PATTERNS[year](direction=direction)}.{fmt}"

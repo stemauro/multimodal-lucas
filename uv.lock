@@ -882,6 +882,7 @@ dev = [
     { name = "yamlfix" },
 ]
 processing = [
+    { name = "aiohttp" },
     { name = "polars" },
 ]
 
@@ -903,7 +904,10 @@ dev = [
     { name = "ruff", specifier = ">=0.16.1" },
     { name = "yamlfix", specifier = ">=1.19.1" },
 ]
-processing = [{ name = "polars", specifier = ">=1.43.2" }]
+processing = [
+    { name = "aiohttp", specifier = ">=3.14.3" },
+    { name = "polars", specifier = ">=1.43.2" },
+]
 
 [[package]]
 name = "multiprocess"

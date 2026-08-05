@@ -33,6 +33,7 @@ dev = [
     "yamlfix>=1.19.1",
 ]
 processing = [
+    "aiohttp>=3.14.3",
     "polars>=1.43.2",
 ]
 

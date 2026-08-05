@@ -23,15 +23,21 @@ POLARS_LOADERS = {
     "csv": pl.read_csv,
     "json": pl.read_json,
     "jsonl": pl.read_ndjson,
+    "parquet": pl.read_parquet,
     "tsv": partial(pl.read_csv, separator="\t"),
+}
+
+POLARS_WRITERS = {
+    "csv": pl.DataFrame.write_csv,
+    "json": pl.DataFrame.write_json,
+    "jsonl": pl.DataFrame.write_ndjson,
+    "parquet": pl.DataFrame.write_parquet,
+    "tsv": partial(pl.DataFrame.write_csv, separator="\t"),
 }
 
 
 def load_dataframe(
-    fmt: str | DataframeFormat,
-    path: str | Path,
-    strict=True,
-    **polars_specific_loading_kwargs,
+    fmt: str | DataframeFormat, path: str | Path, **loader_specific_kwargs
 ):
     """A convenient wrapper around a polars loader function, i.e., polars.load_csv(),
     agnostic with respect to the data format and with controlled unstrict loading option
@@ -40,5 +46,20 @@ def load_dataframe(
     fmt = DataframeFormat(fmt)
     path = Path(path)
 
-    polars_specific_loading_kwargs["infer_schema"] = strict
-    return POLARS_LOADERS[fmt](path, **polars_specific_loading_kwargs)
+    return POLARS_LOADERS[fmt](path, **loader_specific_kwargs)
+
+
+def save_dataframe(
+    frame: pl.DataFrame,
+    fmt: str | DataframeFormat,
+    path: str | Path,
+    **polars_writing_kwargs,
+):
+    """A convenient wrapper around a polars loader function, i.e., polars.load_csv(),
+    agnostic with respect to the data format and with controlled unstrict loading option
+    """
+
+    fmt = DataframeFormat(fmt)
+    path = Path(path)
+
+    return POLARS_WRITERS[fmt](frame, path, **polars_writing_kwargs)
