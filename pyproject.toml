@@ -32,6 +32,9 @@ dev = [
     "ruff>=0.16.1",
     "yamlfix>=1.19.1",
 ]
+processing = [
+    "polars>=1.43.2",
+]
 
 [tool.ruff]
 line-length = 88              

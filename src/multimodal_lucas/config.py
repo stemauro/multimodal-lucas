@@ -2,8 +2,8 @@
 #
 # SPDX-License-Identifier: MIT
 
-import functools
 from enum import StrEnum
+from functools import partial
 
 GISCO_PHOTOS_BASE_URL = "https://gisco-services.ec.europa.eu/lucas/photos"
 
@@ -42,12 +42,12 @@ def get_latest_filename_pattern(year: str, *, direction: LucasDirection) -> str:
 
 
 FILENAME_PATTERNS = {
-    "2006": functools.partial(get_legacy_filename_pattern, year="2006"),
-    "2009": functools.partial(get_legacy_filename_pattern, year="2009"),
-    "2012": functools.partial(get_legacy_filename_pattern, year="2012"),
-    "2015": functools.partial(get_legacy_filename_pattern, year="2015"),
-    "2018": functools.partial(get_legacy_filename_pattern, year="2018"),
-    "2022": functools.partial(get_latest_filename_pattern, year="2022"),
+    "2006": partial(get_legacy_filename_pattern, year="2006"),
+    "2009": partial(get_legacy_filename_pattern, year="2009"),
+    "2012": partial(get_legacy_filename_pattern, year="2012"),
+    "2015": partial(get_legacy_filename_pattern, year="2015"),
+    "2018": partial(get_legacy_filename_pattern, year="2018"),
+    "2022": partial(get_latest_filename_pattern, year="2022"),
 }
 
 
