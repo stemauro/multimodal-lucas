@@ -12,7 +12,6 @@ from itertools import batched, zip_longest
 from typing import Any, Protocol
 
 import polars as pl
-import requests
 from aiohttp import ClientSession
 from datasets import Dataset
 from polars import selectors as cs
@@ -26,10 +25,6 @@ from multimodal_lucas.data import load_dataframe, save_dataframe
 class ScriptArgs(Protocol):
     year: str
     num_tasks: int
-
-
-def is_resource_found(url: str) -> bool:
-    return requests.get(url).ok
 
 
 def chunk_according_to_tasks(data: Sequence[Any], num_tasks: int) -> list[tuple[Any]]:
@@ -169,17 +164,11 @@ async def main(args: ScriptArgs) -> None:
 
     # 4. Convert dataframe to a HuggingFace dataset save it locally
 
-    df_clean = load_dataframe(
-        "jsonl", path=project_root / "data/processed/2022/manifest.jsonl"
-    )
-
     dataset_clean = lowercase_column_names(
         Dataset.from_dict(df_clean.to_dict(as_series=False))
     )
     dataset_clean.save_to_disk(str(output_dir))
 
-
-""
 
 if __name__ == "__main__":
     parser = ArgumentParser(
