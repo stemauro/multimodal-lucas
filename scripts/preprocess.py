@@ -14,7 +14,7 @@ from typing import Any, Protocol
 import polars as pl
 import requests
 from aiohttp import ClientSession
-from datasets import Dataset, Features, Image, Value
+from datasets import Dataset
 from polars import selectors as cs
 from tqdm.asyncio import tqdm
 
@@ -125,7 +125,7 @@ async def main(args: ScriptArgs) -> None:
         df_raw.select("POINT_ID", "POINT_NUTS0", "SURVEY_LC1")
         .filter(is_valid_crop)
         .with_columns(url_exprs)
-    )[:5]
+    )
 
     # 2. Validate URLs by storing their response code upon fetch
 
@@ -169,28 +169,12 @@ async def main(args: ScriptArgs) -> None:
 
     # 4. Convert dataframe to a HuggingFace dataset save it locally
 
-    features = Features(
-        {
-            "POINT_ID": Value("string"),
-            "POINT_NUTS0": Value("string"),
-            "SURVEY_LC1": Value("string"),
-            "PHOTO_POINT_HTTP_STATUS": Value("string"),
-            "PHOTO_CROP_HTTP_STATUS": Value("string"),
-            "PHOTO_NORTH_HTTP_STATUS": Value("string"),
-            "PHOTO_SOUTH_HTTP_STATUS": Value("string"),
-            "PHOTO_EAST_HTTP_STATUS": Value("string"),
-            "PHOTO_WEST_HTTP_STATUS": Value("string"),
-            "PHOTO_POINT_URL": Image(),
-            "PHOTO_CROP_URL": Image(),
-            "PHOTO_NORTH_URL": Image(),
-            "PHOTO_SOUTH_URL": Image(),
-            "PHOTO_EAST_URL": Image(),
-            "PHOTO_WEST_URL": Image(),
-        }
+    df_clean = load_dataframe(
+        "jsonl", path=project_root / "data/processed/2022/manifest.jsonl"
     )
 
     dataset_clean = lowercase_column_names(
-        Dataset.from_dict(df_clean.to_dict(as_series=False), features=features)
+        Dataset.from_dict(df_clean.to_dict(as_series=False))
     )
     dataset_clean.save_to_disk(str(output_dir))
 

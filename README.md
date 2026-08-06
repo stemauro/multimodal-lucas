@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
   <img src="assets/banner.png" alt="Banner" style="display: block; margin: 0 auto;">
 </div>
 
-# Multi-modal LUCAS
+# Multimodal LUCAS
 
 This repository provides code to assemble and curate a vision-language dataset from **LUCAS survey data** and **in-situ field photos**. [LUCAS](https://esdac.jrc.ec.europa.eu/projects/lucas) (Land Use/Cover Area Frame statistical Survey) is a land-monitoring exercise conducted by [EUROSTAT](https://ec.europa.eu/eurostat/web/main/home) in close cooperation with the Directorate-General responsible for Agriculture, with technical support from the Joint Research Centre ([JRC](https://commission.europa.eu/about/departments-and-executive-agencies/joint-research-centre_en)). The survey has been repeated every three years since 2006, and each time it has been conducted in the EU member states in place at that point in time. The latest iteration was run in 2022 across all EU-27 member states.
 
