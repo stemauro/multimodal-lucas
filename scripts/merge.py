@@ -19,7 +19,7 @@ def main() -> None:
     data_dir = project_root / "data" / "processed"
 
     dataset_paths = filter(lambda path: path.stem in LUCAS_YEARS, data_dir.iterdir())
-    dataset = concatenate_datasets([load_from_disk(path) for path in dataset_paths])
+    dataset = concatenate_datasets([load_from_disk(path) for path in dataset_paths])  # ty: ignore[invalid-argument-type]
 
     # Re-index merged datasets
     index_name = "index"
