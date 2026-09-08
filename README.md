@@ -4,6 +4,11 @@ SPDX-FileCopyrightText: 2026 Stefano Maurogiovanni <s.maurogiovanni@gmx.de>
 SPDX-License-Identifier: MIT
 -->
 
+> [!CAUTION]
+> **This is the repository’s development branch and contains untested code**.
+> Tested changes will be merged into the `main` branch over time.
+> The code is provided for reproducibility, but use it at your own risk.
+
 <h1>
   <img src="assets/banner.png" alt="Banner" style="width: 100%; display: block; margin: 0 auto;">
 
@@ -32,13 +37,13 @@ multimodal-lucas/
 ├── assets
 ├── data
 │   ├── processed
-│   │   └── <survey_year>
+│   │   └── {{survey_year}}
 │   │       ├── data-00000-of-00001.arrow
 │   │       ├── dataset_info.json
 │   │       ├── manifest.jsonl
 │   │       └── state.json
 │   └── raw
-│       └── EU_LUCAS_<survey_year>.csv
+│       └── EU_LUCAS_{{survey_year}}.csv
 ├── pyproject.toml
 ├── scripts
 ├── src

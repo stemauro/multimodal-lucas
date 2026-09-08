@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-"""Merge LUCAS datasets from multiple years a push to hub."""
+"""Merge LUCAS datasets from multiple years and push to hub."""
 
 import os
 
