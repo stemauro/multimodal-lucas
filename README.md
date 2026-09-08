@@ -4,11 +4,12 @@ SPDX-FileCopyrightText: 2026 Stefano Maurogiovanni <s.maurogiovanni@gmx.de>
 SPDX-License-Identifier: MIT
 -->
 
-<div style="text-align: center;">
-  <img src="assets/banner.png" alt="Banner" style="display: block; margin: 0 auto;">
-</div>
+<h1>
+  <img src="assets/banner.png" alt="Banner" style="width: 100%; display: block; margin: 0 auto;">
 
-# Multimodal LUCAS
+[![HuggingFace](https://img.shields.io/badge/Hugging_Face-stemauro/multimodal--lucas-FFD21E?logo=huggingface)](https://huggingface.co/datasets/stemauro/multimodal-lucas)
+
+</h1>
 
 This repository provides code to assemble and curate a vision-language dataset from **LUCAS survey data** and **in-situ field photos**. [LUCAS](https://esdac.jrc.ec.europa.eu/projects/lucas) (Land Use/Cover Area Frame statistical Survey) is a land-monitoring exercise conducted by [EUROSTAT](https://ec.europa.eu/eurostat/web/main/home) in close cooperation with the Directorate-General responsible for Agriculture, with technical support from the Joint Research Centre ([JRC](https://commission.europa.eu/about/departments-and-executive-agencies/joint-research-centre_en)). The survey has been repeated every three years since 2006, and each time it has been conducted in the EU member states in place at that point in time. The latest iteration was run in 2022 across all EU-27 member states.
 
@@ -31,17 +32,20 @@ multimodal-lucas/
 ├── assets
 ├── data
 │   ├── processed
-│   │   └── 2022
+│   │   └── <survey_year>
 │   │       ├── data-00000-of-00001.arrow
 │   │       ├── dataset_info.json
 │   │       ├── manifest.jsonl
 │   │       └── state.json
 │   └── raw
-│       └── EU_LUCAS_2022.csv
+│       └── EU_LUCAS_<survey_year>.csv
 ├── pyproject.toml
 ├── scripts
-│   └── preprocess.py
 ├── src
 │   └── multimodal_lucas
 └── uv.lock
 ```
+
+## License
+
+The LUCAS data and field photos are available from EUROSTAT under its free-reuse policy and may be reused with appropriate attribution. The data-curation code in this repository is released under a permissive [MIT License](LICENSES/MIT.txt).
