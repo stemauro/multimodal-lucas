@@ -9,7 +9,39 @@ from functools import partial
 
 GISCO_PHOTOS_BASE_URL = "https://gisco-services.ec.europa.eu/lucas/photos"
 
+CANONICAL_YEAR = "2022"
+
 LUCAS_YEARS = ["2006", "2009", "2012", "2015", "2018", "2022"]
+
+COLUMN_NAMES = {
+    "2018": (
+        "POINT_ID",
+        "NUTS0",
+        "NUTS1",
+        "NUTS2",
+        "NUTS3",
+        "TH_LAT",
+        "TH_LONG",
+        "LC1",
+        "SURVEY_DATE",
+    ),
+    "2022": (
+        "POINT_ID",
+        "POINT_NUTS0",
+        "POINT_NUTS1",
+        "POINT_NUTS2",
+        "POINT_NUTS3",
+        "POINT_LAT",
+        "POINT_LONG",
+        "SURVEY_LC1",
+        "SURVEY_DATE",
+    ),
+}
+
+DATE_FORMATS = {
+    "2018": "%d/%m/%y",
+    "2022": "%m/%d/%Y %R",
+}
 
 
 class LucasDirection(StrEnum):

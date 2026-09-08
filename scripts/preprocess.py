@@ -12,14 +12,20 @@ from itertools import batched, zip_longest
 from typing import Any, Protocol
 
 import polars as pl
+import polars.selectors as cs
 from aiohttp import ClientSession
 from datasets import Dataset
-from polars import selectors as cs
 from tqdm.asyncio import tqdm
 
 from multimodal_lucas import project_root
-from multimodal_lucas.config import LUCAS_YEARS, LucasDirection, get_url_pattern
-from multimodal_lucas.data import load_dataframe, save_dataframe
+from multimodal_lucas.config import (
+    CANONICAL_YEAR,
+    DATE_FORMATS,
+    LUCAS_YEARS,
+    LucasDirection,
+    get_url_pattern,
+)
+from multimodal_lucas.data import load_dataframe, rename_canonical, save_dataframe
 
 
 class ScriptArgs(Protocol):
@@ -102,12 +108,26 @@ async def flush_to_list(
 
 
 async def main(args: ScriptArgs) -> None:
+    target_columns = (
+        "POINT_ID",
+        "POINT_NUTS0",
+        "POINT_NUTS1",
+        "POINT_NUTS2",
+        "POINT_NUTS3",
+        "POINT_LAT",
+        "POINT_LONG",
+        "SURVEY_LC1",
+        "SURVEY_DATE",
+    )
 
     # 1. Load dataset and compile file URLs ###
 
     is_valid_crop = pl.col("SURVEY_LC1").str.starts_with("B") & ~pl.col(
         "SURVEY_LC1"
     ).str.contains("x")
+    survey_date = pl.col("SURVEY_DATE").str.to_datetime(format=DATE_FORMATS[args.year])
+    survey_year = pl.col("SURVEY_DATE").dt.year().alias("SURVEY_YEAR")
+    url_exprs = [compile_url_expr(args.year, direction) for direction in LucasDirection]
 
     df_raw = load_dataframe(
         "csv",
@@ -115,11 +135,15 @@ async def main(args: ScriptArgs) -> None:
         infer_schema=False,
     )
 
-    url_exprs = [compile_url_expr(args.year, direction) for direction in LucasDirection]
+    if args.year != CANONICAL_YEAR:
+        df_raw = rename_canonical(df_raw, current_year=args.year)
+
     df_augmented = (
-        df_raw.select("POINT_ID", "POINT_NUTS0", "SURVEY_LC1")
+        df_raw.select(target_columns)
         .filter(is_valid_crop)
-        .with_columns(url_exprs)
+        .with_columns([survey_date] + url_exprs)
+        .with_columns(survey_year)
+        .with_row_index()
     )
 
     # 2. Validate URLs by storing their response code upon fetch
@@ -130,8 +154,8 @@ async def main(args: ScriptArgs) -> None:
     data = df_augmented.select("POINT_ID", cs.starts_with("PHOTO")).rows(named=True)
     data_chunks = chunk_according_to_tasks(data, num_tasks=args.num_tasks)
 
-    fetch_progress = tqdm(total=len(data), desc="Fetching headers", unit="url")
-    flush_progress = tqdm(total=len(data), desc="Flushing status codes", unit="item")
+    fetch_progress = tqdm(total=len(data), desc="Fetching headers", unit=" urls")
+    flush_progress = tqdm(total=len(data), desc="Flushing status codes", unit=" items")
 
     async with ClientSession() as session:
         fetch_tasks = [
@@ -159,7 +183,7 @@ async def main(args: ScriptArgs) -> None:
     )
 
     output_dir = project_root / "data" / "processed" / args.year
-    output_dir.mkdir(exist_ok=True, parents=True)
+    output_dir.mkdir(parents=True)
     save_dataframe(df_clean, fmt="jsonl", path=output_dir / "manifest.jsonl")
 
     # 4. Convert dataframe to a HuggingFace dataset save it locally
@@ -192,3 +216,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     asyncio.run(main(args))
+    # main(args)

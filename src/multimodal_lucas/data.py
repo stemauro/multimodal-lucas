@@ -11,6 +11,9 @@ from pathlib import Path
 from typing import Any
 
 import polars as pl
+from polars import DataFrame
+
+from multimodal_lucas.config import CANONICAL_YEAR, COLUMN_NAMES
 
 
 class DataframeFormat(StrEnum):
@@ -67,3 +70,15 @@ def save_dataframe(
     path = Path(path)
 
     POLARS_WRITERS[fmt](frame, path, **polars_writing_kwargs)
+
+
+def rename_canonical(
+    df: DataFrame, current_year: str, canonical_year: str = CANONICAL_YEAR
+) -> DataFrame:
+    """Rename datagrame columns to canonical names"""
+    keys = COLUMN_NAMES[current_year]
+    values = COLUMN_NAMES[canonical_year]
+
+    columns_mapping = dict(zip(keys, values, strict=True))
+
+    return df.rename(columns_mapping)
