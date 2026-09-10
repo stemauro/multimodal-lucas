@@ -24,6 +24,9 @@ requires = ["uv_build>=0.11.8,<0.12.0"]
 build-backend = "uv_build"
 
 [dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
 processing = [
     "aiohttp>=3.14.3",
     "polars>=1.43.2",
@@ -44,7 +47,7 @@ dev = [
 line-length = 88              
 target-version = "py312"       
 src = ["src"]                 
-extend-include = ["scripts/*.py", "pyproject.toml", "*.toml"]                
+extend-include = ["scripts/*.py", "pyproject.toml", "*.toml", "tests/**/*.py"]                
 exclude = [                   
     ".git",
     "__pycache__",
@@ -66,6 +69,9 @@ per-file-ignores = {"pyproject.toml" = ["INP001"]}
 [tool.ty.rules]
 missing-type-argument = "error"
 possibly-unresolved-reference = "warn"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 
 [tool.commitizen]
