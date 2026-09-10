@@ -22,6 +22,7 @@ from multimodal_lucas.config import (
     CANONICAL_YEAR,
     DATE_FORMATS,
     LUCAS_YEARS,
+    TARGET_COLUMNS,
     LucasDirection,
     get_url_pattern,
 )
@@ -108,17 +109,7 @@ async def flush_to_list(
 
 
 async def main(args: ScriptArgs) -> None:
-    target_columns = (
-        "POINT_ID",
-        "POINT_NUTS0",
-        "POINT_NUTS1",
-        "POINT_NUTS2",
-        "POINT_NUTS3",
-        "POINT_LAT",
-        "POINT_LONG",
-        "SURVEY_LC1",
-        "SURVEY_DATE",
-    )
+    target_columns = TARGET_COLUMNS[args.year]
 
     # 1. Load dataset and compile file URLs ###
 

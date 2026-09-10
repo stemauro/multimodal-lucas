@@ -13,7 +13,7 @@ CANONICAL_YEAR = "2022"
 
 LUCAS_YEARS = ["2006", "2009", "2012", "2015", "2018", "2022"]
 
-COLUMN_NAMES = {
+TARGET_COLUMNS = {
     "2018": (
         "POINT_ID",
         "NUTS0",
