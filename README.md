@@ -48,6 +48,7 @@ multimodal-lucas/
 ├── scripts
 ├── src
 │   └── multimodal_lucas
+├── tests
 └── uv.lock
 ```
 
