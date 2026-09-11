@@ -23,7 +23,8 @@ This repository provides code to assemble and curate a vision-language dataset f
 Requires Python3.12+.
 
 ```shell
-git clone git@github.com:stemauro/multimodal-lucas.git && cd multimodal-lucas
+git clone --branch develop git@github.com:stemauro/multimodal-lucas.git &&
+cd multimodal-lucas && 
 uv sync --all-groups --extra dev
 ```
 
